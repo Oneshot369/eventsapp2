@@ -1,0 +1,6 @@
+target/
+target/**/*.lst
+target/*.jar
+
+.vscode
+*.sql
