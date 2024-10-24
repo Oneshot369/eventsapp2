@@ -31,6 +31,12 @@ public class UserService implements UserDetailsService{
 
     public UserModel save(UserModel userModel) { 
         UserEntity userEntity = convertToEntity(userModel);
+        
+        userEntity.setEnabled(true);
+        userEntity.setAccountNonExpired(true);
+        userEntity.setAccountNonLocked(true);
+        userEntity.setCredentialsNonExpired(true);
+
         userEntity.setPassword(passwordEncoder.encode(userModel.getPassword()));
         UserEntity savedUser = userRepository.save(userEntity);
         return convertToModel(savedUser);

@@ -22,13 +22,9 @@ import com.shadsluiter.eventsapp.security.JwtAuthenticationFilter;
 @EnableWebSecurity
 public class SecurityConfig {
     
-    private final UserDetailsService userDetailsService;
-    private final PasswordEncoder passwordEncoder;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(UserDetailsService uDetails, PasswordEncoder pEncoder, JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.userDetailsService = uDetails;
-        this.passwordEncoder = pEncoder;
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
@@ -38,18 +34,9 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                .requestMatchers("/users/register", "/api/users/login","users/loginForm",  "events", "/events/search", "users/", "/index", "/css/**", "/js/**").permitAll()
-                .requestMatchers("orders/edit/**", "orders/delete/**", "/api/events/getAll").authenticated() // Require authentication for all order-related endpoints
+                .requestMatchers( "/api/users/register", "/api/users/login").permitAll()
+                .requestMatchers("/api/events/**").authenticated() // Require authentication for all order-related endpoints
                 .anyRequest().authenticated())
-            // .formLogin(loginform -> loginform
-            //         .loginPage("/users/loginForm")
-            //         .loginProcessingUrl("/login")
-            //         .defaultSuccessUrl("/users/", true)
-            //         .failureUrl("/users/loginForm?error=true")
-            //         .permitAll())
-            // .logout(logout -> logout
-            //         .logoutUrl("/logout")
-            //         .logoutSuccessUrl("/index")
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

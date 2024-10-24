@@ -41,7 +41,8 @@ public class UserApiController {
             return new ResponseEntity<String>("User already exists!", HttpStatus.BAD_REQUEST);
         }
         //encrypt the pw
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        //user.setPassword(passwordEncoder.encode(user.getPassword()));
+        
         // save the user to the database
         userService.save(user);
         return new ResponseEntity<String>("User added", HttpStatus.OK);
