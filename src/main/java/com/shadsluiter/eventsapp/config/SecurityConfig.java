@@ -15,13 +15,9 @@ import com.shadsluiter.eventsapp.security.JwtAuthenticationFilter;
 @EnableWebSecurity
 public class SecurityConfig {
     
-    private final UserDetailsService userDetailsService;
-    private final PasswordEncoder passwordEncoder;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(UserDetailsService uDetails, PasswordEncoder pEncoder, JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.userDetailsService = uDetails;
-        this.passwordEncoder = pEncoder;
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
