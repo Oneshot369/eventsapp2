@@ -1,20 +1,33 @@
 package com.shadsluiter.eventsapp.data;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import com.shadsluiter.eventsapp.models.EventEntity;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
 public class EventRepository implements EventRepositoryInterface {
 
     private final JdbcTemplate jdbcTemplate;
+    @Value("${spring.datasource.url}")
+    private String url;
+    @Value("${spring.datasource.username}")
+    private String username;
+    @Value("${spring.datasource.password}")
+    private String password;
+
 
     @Autowired
     public EventRepository(JdbcTemplate jdbcTemplate) {
@@ -84,7 +97,32 @@ public class EventRepository implements EventRepositoryInterface {
 
     @Override
     public List<EventEntity> findByDescription(String description) { 
-        String sql = "SELECT * FROM events WHERE description LIKE '%" + description + "%'";
+        String sql = "SELECT * FROM events WHERE description LIKE ?";
+        
         return jdbcTemplate.query(sql, new EventModelRowMapper());
     }
+    // @Override
+    // public List<EventEntity> findByDescription(String description) { 
+    //     String sql = "SELECT * FROM events WHERE description LIKE '%" + description + "%'";
+    //     System.out.println(sql);
+    //     List<EventEntity> eventEntities = new ArrayList<>();
+    //     try (Connection conn = DriverManager.getConnection(url, username, password);
+    //          Statement stmt = conn.createStatement();
+    //          ResultSet rs = stmt.executeQuery(sql)) {
+    
+    //         while (rs.next()) {
+    //             EventEntity order = new EventEntity();
+    //             order.setId(rs.getLong("id"));
+    //             order.setName(rs.getString("name"));
+    //             order.setDate(rs.getDate("date"));
+    //             order.setLocation(rs.getString("location"));
+    //             order.setOrganizerid(rs.getString("notes"));
+    //             order.setDescription(rs.getString("description"));
+    //             eventEntities.add(order);
+    //         }
+    //     } catch (SQLException e) {
+    //         e.printStackTrace();
+    //     }
+    //     return eventEntities;
+
 }

